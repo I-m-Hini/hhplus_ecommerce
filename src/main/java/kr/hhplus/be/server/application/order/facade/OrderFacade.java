@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.order.facade;
 import kr.hhplus.be.server.application.order.dto.request.OrderFacadeRequest;
 import kr.hhplus.be.server.application.order.dto.request.OrderProductDto;
 import kr.hhplus.be.server.application.order.dto.response.OrderFacadeResponse;
+import kr.hhplus.be.server.application.order.event.OrderCreatedEvent;
 import kr.hhplus.be.server.domain.coupon.dto.CouponIssuanceResult;
 import kr.hhplus.be.server.domain.coupon.enums.DiscountType;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
@@ -15,9 +16,9 @@ import kr.hhplus.be.server.domain.product.dto.ProductResult;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.user.dto.UserResult;
 import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.infrastructure.external.OrderEventDataPlatformSender;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,8 @@ public class OrderFacade {
     private final UserService userService;
     private final ProductService productService;
     private final CouponService couponService;
-    private final OrderEventDataPlatformSender orderDataPlatformSender;
+    // private final OrderEventDataPlatformSender orderDataPlatformSender;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public OrderFacadeResponse createOrder(OrderFacadeRequest request) {
@@ -69,7 +71,8 @@ public class OrderFacade {
         List<OrderItem> orderProductResult = orderService.createOrderProduct(orderItems);
         orderResult.setItems(orderProductResult);
 
-        orderDataPlatformSender.send(orderResult);
+        //orderDataPlatformSender.send(orderResult);
+        eventPublisher.publishEvent(new OrderCreatedEvent(this, orderResult));
 
         return OrderFacadeResponse.toResponse(orderResult);
     }
