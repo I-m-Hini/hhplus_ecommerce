@@ -38,6 +38,27 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+---
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:10002,localhost:10003,localhost:10004
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+    consumer:
+      group-id: hhplus-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: batch
+      missing-topics-fatal: false
+    properties:
+      spring.json.trusted.packages: "*"
+
 ---
 logging:
   level:
